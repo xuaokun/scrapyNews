@@ -11,9 +11,14 @@ app = Flask(__name__)
 #cmdline.execute(["scrapy","crawl","qq_music"])
 # cmdline.execute(["scrapy","crawl","sohu_home"])
 # cmdline.execute(["scrapy","crawl","baidu_home"])
-@app.route('/helloworld')
+@app.route('/newsqq')
 def hello_world():
-    return 'Hello, World!'
+    crawl_threads = Process(target=newsqq_scrapy)
+    crawl_threads.start()
+
+    return jsonify({
+        'msg': 'ok'
+    })
 
 
 @app.route('/sohunews')
@@ -25,8 +30,12 @@ def sohu_start():
         'msg': 'ok'
     })
 
+#搜狐新闻
 def sohu_scrapy():
     cmdline.execute(["scrapy","crawl","sohu_home"])
+#腾讯新闻
+def newsqq_scrapy():
+    cmdline.execute(["scrapy", "crawl", "news_qq"])
 
 if __name__ == '__main__':
     # app.run(host, port, debug, options)

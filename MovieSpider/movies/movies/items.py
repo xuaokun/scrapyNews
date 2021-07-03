@@ -4,9 +4,9 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
-
+from datetime import datetime
 import scrapy
-from elasticsearch_dsl import Document,Completion,Keyword,Text,Integer,Double
+from elasticsearch_dsl import Document,Completion,Keyword,Text,Integer,Double,Date
 from elasticsearch_dsl.analysis import CustomAnalyzer
 from elasticsearch_dsl.connections import connections
 # es = connections.create_connection(hosts=['47.94.250.123:9200'])
@@ -28,7 +28,8 @@ class newsType(Document):
     #music_rank = Integer()
     title = Text(analyzer = 'ik_max_word')
     author = Text(analyzer = 'ik_max_word')
-    date = Text(analyzer = 'ik_max_word')
+    # date = Text(analyzer='ik_max_word')
+    pubdate = Text(analyzer='ik_max_word')
     content = Text(analyzer = 'ik_max_word')
     suggest = Completion(analyzer = ik_analyzer)
 
@@ -50,6 +51,7 @@ class NewsItem(scrapy.Item):
     url = scrapy.Field()
     title = scrapy.Field()
     date = scrapy.Field()
+    pubdate = scrapy.Field()
     author = scrapy.Field()
     content = scrapy.Field()
     def save_to_es(self):
@@ -57,7 +59,9 @@ class NewsItem(scrapy.Item):
         news = newsType()
         news.url = self['url']
         news.author = self['author']
-        news.date = self['date']
+        # news.date = self['date']
+        news.pubdate = self['date'] + ':00'
+        # news.pubdate = datetime.strptime(self['date'], format('%Y-%m-%d %H:%M'))
         news.title = self['title']
         news.content = self['content']
         news.suggest = self.gen_suggests(((news.title, 50),(news.content,30),(news.author,30)))

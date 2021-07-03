@@ -14,6 +14,8 @@ from selenium.webdriver.chrome.options import Options
 class SeleniumMiddleware(object):
     # 动态页面
     def process_request(self, request, spider):
+        if 'sohu.com' in request.url:
+            return None
         chrome_options = Options()
         chrome_options.add_argument('--headless')  # 使用无头谷歌浏览器模式
         chrome_options.add_argument('--disable-gpu')
@@ -28,10 +30,10 @@ class SeleniumMiddleware(object):
             # scrollTop 从上往下的滑动距离
             js = 'document.body.scrollTop=document.body.scrollHeight * %f' % i
             self.driver.execute_script(js)
-        # time.sleep(1)
+        time.sleep(1)
         html = self.driver.page_source
         self.driver.quit()
-        return scrapy.http.HtmlResponse(url=request.url, body=html.encode('utf-8'), encoding='utf-8',
+        return scrapy.http.HtmlResponse(url=request.url, body=html, encoding='utf-8',
                                         request=request)
 class MoviesSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
