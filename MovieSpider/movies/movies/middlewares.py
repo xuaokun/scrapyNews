@@ -10,19 +10,23 @@ from scrapy import signals
 import scrapy
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+notActiveUrl = ['cctv.com', 'sohu.com']
 
 class SeleniumMiddleware(object):
     # 动态页面
     def process_request(self, request, spider):
-        if 'sohu.com' in request.url:
-            return None
+        # if 'sohu.com' in request.url:
+        #     return None
+        for url in notActiveUrl:
+            if url in request.url:
+                return None
         chrome_options = Options()
         chrome_options.add_argument('--headless')  # 使用无头谷歌浏览器模式
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
         # 指定谷歌浏览器路径
         self.driver = webdriver.Chrome(chrome_options=chrome_options,
-                                       executable_path='E:/chromedriver')
+                                       executable_path='D:/chromedriver')
         self.driver.get(request.url)
         #需要向下滑动的页面
         for x in range(1, 12, 2):
@@ -30,7 +34,24 @@ class SeleniumMiddleware(object):
             # scrollTop 从上往下的滑动距离
             js = 'document.body.scrollTop=document.body.scrollHeight * %f' % i
             self.driver.execute_script(js)
-        time.sleep(1)
+            time.sleep(0.1)
+        #加载评论信息
+        # if 'sohu.com' in request.url:
+        #     try:
+        #         while(True):
+        #             self.driver.find_element_by_class_name('c-comment-more').click()
+        #             print('{0}点击更多'.format(request.url))
+        #             time.sleep(1)
+        #     except Exception as e:
+        #         print('{0}:{1}'.format(request.url, e))
+
+        if 'http://www.xinhuanet.com/' == request.url:
+            try:
+                for i in range(3):
+                    self.driver.find_element_by_class_name('xpage-more-btn').click()
+            except Exception as e:
+                print('{0}:{1}'.format(request.url, e))
+
         html = self.driver.page_source
         self.driver.quit()
         return scrapy.http.HtmlResponse(url=request.url, body=html, encoding='utf-8',

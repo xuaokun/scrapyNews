@@ -15,6 +15,7 @@ class ExampleSpider(scrapy.Spider):
         # f = open("qqmusic_toplist.html","wb+")
         # f.write(content)
         # f.close()
+        return
         nodes = response.xpath('//a/@href')
         itemsCnt = 0
         for node in nodes:
@@ -22,7 +23,7 @@ class ExampleSpider(scrapy.Spider):
             if url and ('sohu.com' in str(url)):
                 itemsCnt += 1
                 print('本次爬取第{}条数据'.format(++itemsCnt))
-                # if(itemsCnt > 9):
+                # if(itemsCnt > 10):
                 #     break
                 yield Request(url=url, callback=self.parse_detail)
 
@@ -44,15 +45,19 @@ class ExampleSpider(scrapy.Spider):
             author = node.css('span[data-role="original-link"] > a::text').extract_first()
             # print(author)
             # print('-----')
-            contentList = node.css('article strong::text,p::text').extract()
+            contentList = node.css('article strong::text,article p::text').extract()
             content = ''
             for par in contentList:
                 if '原标题：' in str(par):
                     continue
                 if '责任编辑：' in str(par):
                     continue
+                if not par.strip():
+                    continue
                 content += par.strip() + '\n'
             # print(content)
+            contentHot = node.css('#mpbox > div.c-comment-content > div > div:nth-child(2) > div').extract()
+            print(contentHot)
             item['url'] = url
             item['title'] = title
             item['date'] = date

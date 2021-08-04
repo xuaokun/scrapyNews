@@ -23,7 +23,6 @@ class ExampleSpider(scrapy.Spider):
             url = node.extract()
             print(url)
             yield Request(url=url, callback=self.parse_detail)
-            break
 
     def parse_detail(self, response):
         # f = open("xinhuanet.txt", "a+")
