@@ -21,7 +21,7 @@ class ExampleSpider(scrapy.Spider):
                 yield Request(url=url, callback=self.parse_detail)
 
     def parse_detail(self, response):
-        f = open("sohu.txt", "a+")
+        # f = open("sohu.txt", "a+")
         item = NewsItem()
         url = response.url
         node = response.xpath('//div[@data-spm="content"]')
@@ -29,8 +29,10 @@ class ExampleSpider(scrapy.Spider):
             title = node.css('.text-title > h1::text').extract_first().strip() \
                     or node.css('span.title-info-title::text').extract_first().strip()
             date = node.css('.time::text').extract_first()
-            author = node.css('span[data-role="original-link"] > a::text,'
-                              'span[data-role="original-link"]::text').extract_first()
+            author = node.css('span[data-role="original-link"] > a::text,span[data-role="original-link"]::text')\
+                .extract_first()
+            if '来源' in author or author.strip() == '':
+                author = '搜狐网'
             contentList = node.css('article strong::text,article p::text').extract()
             content = ''
             for par in contentList:
@@ -41,14 +43,14 @@ class ExampleSpider(scrapy.Spider):
                 if not par.strip():
                     continue
                 content += par.strip() + '\n'
-            contentHot = node.css('#mpbox > div.c-comment-content > div > div:nth-child(2) > div').extract()
+            # contentHot = node.css('#mpbox > div.c-comment-content > div > div:nth-child(2) > div').extract()
             item['url'] = url
             item['title'] = title
             item['date'] = date + ':00'
             item['author'] = author
             item['content'] = content
             yield item
-            f.write(url + '\n')
-            f.write(title + ' ' + date + ' ' + author + '\n')
-            f.write(content)
-        f.close()
+        #     f.write(url + '\n')
+        #     f.write(title + ' ' + date + ' ' + author + '\n')
+        #     f.write(content)
+        # f.close()
